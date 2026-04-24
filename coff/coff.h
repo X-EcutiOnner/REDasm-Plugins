@@ -1,0 +1,35 @@
+#pragma once
+
+#include <redasm/redasm.h>
+
+// COFF Symbol Storage Classes
+#define IMAGE_SYM_CLASS_EXTERNAL 2
+
+// COFF Symbol Types (high byte of Type field)
+#define IMAGE_SYM_DTYPE_FUNCTION 2
+
+// COFF Symbol Section Numbers
+#define IMAGE_SYM_UNDEFINED 0
+#define IMAGE_SYM_ABSOLUTE ((u16) - 1)
+#define IMAGE_SYM_DEBUG ((u16) - 2)
+
+#define COFF_SYMBOL_SIZE 18
+
+typedef struct CoffSymbol {
+    union {
+        char short_name[8];
+        struct {
+            u32 zeroes;
+            u32 offset;
+        } long_name;
+    } name;
+
+    u32 value;
+    i16 section_number;
+    u16 type;
+    u8 storage_class;
+    u8 n_aux_symbols;
+} CoffSymbol;
+
+const char* coff_get_name(const CoffSymbol* sym, const char* strtab,
+                          u32 strtab_size);

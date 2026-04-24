@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
+project(redasm-commands C)
 
-project(REDasm_Plugins)
+if(NOT TARGET redasm::redasm)
+    find_package(redasm REQUIRED)
+endif()
 
-add_subdirectory(compiler)
+add_subdirectory(coff)

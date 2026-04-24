@@ -1,0 +1,94 @@
+#include "coff.h"
+#include <redasm/redasm.h>
+#include <stdlib.h>
+
+static RDCommandValue _rd_coff_execute(RDContext* ctx,
+                                       const RDCommandValue* args) {
+    RDOffset offset = args[0].off;
+    u64 count = args[1].u;
+    if(!count) return (RDCommandValue){0};
+
+    RDReader* r = rd_get_input_reader(ctx);
+
+    // read string table: immediately follows symbol table
+    RDOffset strtab_offset = offset + (count * COFF_SYMBOL_SIZE);
+    rd_reader_seek(r, strtab_offset);
+
+    u32 strtab_size = 0;
+    rd_reader_read_le32(r, &strtab_size);
+
+    char* strtab = NULL;
+    if(strtab_size > 4) {
+        usize data_size = strtab_size - 4;
+
+        strtab = malloc(data_size + 1);
+
+        if(!rd_reader_read(r, strtab, data_size)) {
+            free(strtab);
+            return (RDCommandValue){0};
+        }
+
+        strtab[data_size] = '\0';
+        // adjust pointer so offset is relative to start of string table data
+        strtab -= 4;
+    }
+
+    rd_reader_seek(r, offset);
+
+    for(u64 i = 0; i < count;) {
+        CoffSymbol sym;
+        rd_reader_read(r, sym.name.short_name, sizeof(sym.name.short_name));
+        rd_reader_read_le32(r, &sym.value);
+        rd_reader_read_le16(r, (u16*)&sym.section_number);
+        rd_reader_read_le16(r, &sym.type);
+        rd_reader_read_u8(r, &sym.storage_class);
+        rd_reader_read_u8(r, &sym.n_aux_symbols);
+
+        if(rd_reader_has_error(r)) break;
+
+        i += 1 + sym.n_aux_symbols;
+
+        // skip aux records
+        if(sym.n_aux_symbols)
+            rd_reader_seek(r, rd_reader_get_pos(r) +
+                                  ((u64)sym.n_aux_symbols * COFF_SYMBOL_SIZE));
+
+        // only care about external symbols in real sections
+        if(sym.storage_class != IMAGE_SYM_CLASS_EXTERNAL) continue;
+        if(sym.section_number <= 0) continue;
+        if(!sym.value) continue;
+
+        const char* name = coff_get_name(&sym, strtab, strtab_size);
+        if(!name || !(*name)) continue;
+
+        RDAddress addr;
+        if(!rd_to_address(ctx, sym.value, &addr)) continue;
+
+        u8 derived_type = (sym.type >> 8) & 0xFF;
+
+        if(derived_type == IMAGE_SYM_DTYPE_FUNCTION)
+            rd_library_function(ctx, addr, name);
+        else
+            rd_library_name(ctx, addr, name);
+    }
+
+    if(strtab) free(strtab + 4);
+
+    return (RDCommandValue){0};
+}
+
+static const RDCommandParam COFF_PARAMS[] = {
+    {RD_CMDARG_OFFSET, "offset"},
+    {RD_CMDARG_UINT, "count"},
+    {RD_CMDARG_VOID},
+};
+
+static const RDCommandPlugin COFF = {
+    .level = RD_API_LEVEL,
+    .id = "coff_parse",
+    .name = "COFF Parser",
+    .params = COFF_PARAMS,
+    .execute = _rd_coff_execute,
+};
+
+void rd_plugin_create(void) { rd_register_command(&COFF); }
