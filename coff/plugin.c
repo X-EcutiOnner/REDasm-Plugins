@@ -1,6 +1,5 @@
 #include "coff.h"
 #include <redasm/redasm.h>
-#include <stdlib.h>
 
 static RDCommandValue _rd_coff_execute(RDContext* ctx,
                                        const RDCommandValue* args) {
@@ -21,10 +20,10 @@ static RDCommandValue _rd_coff_execute(RDContext* ctx,
     if(strtab_size > 4) {
         usize data_size = strtab_size - 4;
 
-        strtab = malloc(data_size + 1);
+        strtab = rd_alloc(data_size + 1);
 
         if(!rd_reader_read(r, strtab, data_size)) {
-            free(strtab);
+            rd_free(strtab);
             return (RDCommandValue){0};
         }
 
@@ -72,7 +71,7 @@ static RDCommandValue _rd_coff_execute(RDContext* ctx,
             rd_library_name(ctx, addr, name);
     }
 
-    if(strtab) free(strtab + 4);
+    if(strtab) rd_free(strtab + 4);
 
     return (RDCommandValue){0};
 }
