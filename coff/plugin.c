@@ -49,7 +49,7 @@ static RDCommandValue _rd_coff_execute(RDContext* ctx,
 
         // skip aux records
         if(sym.n_aux_symbols)
-            rd_reader_seek(r, rd_reader_get_pos(r) +
+            rd_reader_seek(r, rd_reader_tell(r) +
                                   ((u64)sym.n_aux_symbols * COFF_SYMBOL_SIZE));
 
         // only care about external symbols in real sections
