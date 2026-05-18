@@ -1,5 +1,25 @@
 #include "coff.h"
 #include <redasm/redasm.h>
+#include <string.h>
+
+/*
+ * Interpretation with Storage Class:
+ *   The meaning of the Section Number field is interlinked
+ *   with the Storage Class (n_sclass or e_sclass) and
+ *   Value (n_value or e_value) fields:
+ *
+ * - For External Symbols (C_EXT): If the section number is 0, the Value field
+ *   indicates the size of an uninitialized global variable.
+ *   If the section number is positive, the Value field specifies
+ *   the offset within that section.
+ * - For Static Symbols (C_STAT): If the section number is positive, the Value
+ *   field specifies the offset within the section.
+ *   If the Value is zero, it often represents a Section Symbol indicating
+ *   the start of that section.
+ * - For Function Entry Points: Typically marked as External (C_EXT) with the
+ *   Section Number pointing to the .text section and the Value field holding
+ *   the offset into that section.
+ */
 
 static RDCommandValue _rd_coff_execute(RDContext* ctx,
                                        const RDCommandValue* args) {
@@ -48,9 +68,10 @@ static RDCommandValue _rd_coff_execute(RDContext* ctx,
         i += 1 + sym.n_aux_symbols;
 
         // skip aux records
-        if(sym.n_aux_symbols)
+        if(sym.n_aux_symbols) {
             rd_reader_seek(r, rd_reader_tell(r) +
                                   ((u64)sym.n_aux_symbols * COFF_SYMBOL_SIZE));
+        }
 
         // only care about external symbols in real sections
         if(sym.storage_class != IMAGE_SYM_CLASS_EXTERNAL) continue;
@@ -60,8 +81,12 @@ static RDCommandValue _rd_coff_execute(RDContext* ctx,
         const char* name = coff_get_name(&sym, strtab, strtab_size);
         if(!name || !(*name)) continue;
 
-        RDAddress addr;
-        if(!rd_to_address(ctx, sym.value, &addr)) continue;
+        RDSegmentSlice segments = rd_get_all_segments(ctx);
+        if(sym.section_number - 1 >= rd_slice_length(segments)) continue;
+
+        RDAddress addr =
+            rd_slice_at(segments, sym.section_number - 1)->start_address +
+            sym.value;
 
         u8 derived_type = (sym.type >> 8) & 0xFF;
 

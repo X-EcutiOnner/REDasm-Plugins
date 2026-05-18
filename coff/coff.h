@@ -14,10 +14,11 @@
 #define IMAGE_SYM_DEBUG ((u16) - 2)
 
 #define COFF_SYMBOL_SIZE 18
+#define COFF_SYMBOL_SHORT_NAME_LEN 8
 
 typedef struct CoffSymbol {
     union {
-        char short_name[8];
+        char short_name[COFF_SYMBOL_SHORT_NAME_LEN];
         struct {
             u32 zeroes;
             u32 offset;
