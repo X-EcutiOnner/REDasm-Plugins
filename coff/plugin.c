@@ -60,8 +60,8 @@ static RDCommandValue _rd_coff_execute(RDContext* ctx,
         rd_reader_read_le32(r, &sym.value);
         rd_reader_read_le16(r, (u16*)&sym.section_number);
         rd_reader_read_le16(r, &sym.type);
-        rd_reader_read_u8(r, &sym.storage_class);
-        rd_reader_read_u8(r, &sym.n_aux_symbols);
+        rd_reader_read_byte(r, &sym.storage_class);
+        rd_reader_read_byte(r, &sym.n_aux_symbols);
 
         if(rd_reader_has_error(r)) break;
 
