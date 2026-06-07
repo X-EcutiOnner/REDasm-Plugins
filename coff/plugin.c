@@ -116,3 +116,4 @@ static const RDCommandPlugin COFF = {
 };
 
 void rd_plugin_create(void) { rd_register_command(&COFF); }
+const char* rd_plugin_version(void) { return "1.0"; }
