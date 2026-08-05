@@ -89,11 +89,8 @@ static RDCommandValue _rd_coff_execute(RDContext* ctx,
             sym.value;
 
         u8 derived_type = (sym.type >> 8) & 0xFF;
-
-        if(derived_type == IMAGE_SYM_DTYPE_FUNCTION)
-            rd_library_function(ctx, addr, name);
-        else
-            rd_library_name(ctx, addr, name);
+        if(derived_type == IMAGE_SYM_DTYPE_FUNCTION) rd_set_function(ctx, addr);
+        rd_library_name(ctx, addr, name);
     }
 
     if(strtab) rd_free(strtab + 4);
