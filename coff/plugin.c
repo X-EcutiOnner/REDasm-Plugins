@@ -111,9 +111,9 @@ static const RDCommandPlugin COFF = {
     .execute = _rd_coff_execute,
 };
 
-static void coff_plugin_load(void) { rd_register_command(&COFF); }
+static void coff_module_load(void) { rd_register_command(&COFF); }
 
 RD_MODULE_EXPORT = {
     .api_version = RD_API_VERSION,
-    .load = coff_plugin_load,
+    .load = coff_module_load,
 };
