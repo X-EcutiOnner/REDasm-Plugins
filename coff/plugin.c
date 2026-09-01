@@ -105,11 +105,15 @@ static const RDCommandParam COFF_PARAMS[] = {
 };
 
 static const RDCommandPlugin COFF = {
-    .level = RD_API_LEVEL,
     .id = "coff_parse",
     .name = "COFF Parser",
     .params = COFF_PARAMS,
     .execute = _rd_coff_execute,
 };
 
-void rd_plugin_create(void) { rd_register_command(&COFF); }
+static void coff_plugin_load(void) { rd_register_command(&COFF); }
+
+RD_MODULE_EXPORT = {
+    .api_version = RD_API_VERSION,
+    .load = coff_plugin_load,
+};
