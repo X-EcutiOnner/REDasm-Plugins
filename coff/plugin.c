@@ -42,7 +42,7 @@ static RDCommandValue _rd_coff_execute(RDContext* ctx,
 
         strtab = rd_alloc(data_size + 1);
 
-        if(!rd_reader_read(r, strtab, data_size)) {
+        if(!rd_reader_read_exact(r, strtab, data_size)) {
             rd_free(strtab);
             return (RDCommandValue){0};
         }
@@ -56,7 +56,8 @@ static RDCommandValue _rd_coff_execute(RDContext* ctx,
 
     for(u64 i = 0; i < count;) {
         CoffSymbol sym;
-        rd_reader_read(r, sym.name.short_name, sizeof(sym.name.short_name));
+        rd_reader_read_exact(r, sym.name.short_name,
+                             sizeof(sym.name.short_name));
         rd_reader_read_le32(r, &sym.value);
         rd_reader_read_le16(r, (u16*)&sym.section_number);
         rd_reader_read_le16(r, &sym.type);
