@@ -21,8 +21,7 @@
  *   the offset into that section.
  */
 
-static RDCommandValue _rd_coff_execute(RDContext* ctx,
-                                       const RDCommandValue* args) {
+static RDCommandValue coff_execute(RDContext* ctx, const RDCommandValue* args) {
     RDOffset offset = args[0].off;
     u64 count = args[1].u;
     if(!count) return (RDCommandValue){0};
@@ -109,7 +108,7 @@ static const RDCommandPlugin COFF = {
     .id = "coff_parse",
     .name = "COFF Parser",
     .params = COFF_PARAMS,
-    .execute = _rd_coff_execute,
+    .execute = coff_execute,
 };
 
 static void coff_module_load(void) { rd_register_command(&COFF); }
