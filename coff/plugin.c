@@ -84,12 +84,13 @@ static RDCommandValue coff_execute(RDContext* ctx, const RDCommandValue* args) {
         RDSegmentSlice segments = rd_get_all_segments(ctx);
         if(sym.section_number - 1 >= rd_slice_length(segments)) continue;
 
-        RDAddress addr =
-            rd_slice_at(segments, sym.section_number - 1)->start_address +
-            sym.value;
+        RDAddress addr = rd_segment_get_start(
+                             rd_slice_at(segments, sym.section_number - 1)) +
+                         sym.value;
 
         u8 derived_type = (sym.type >> 8) & 0xFF;
         if(derived_type == IMAGE_SYM_DTYPE_FUNCTION) rd_set_function(ctx, addr);
+
         rd_library_name(ctx, addr, name);
     }
 
