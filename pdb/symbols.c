@@ -19,8 +19,7 @@ static bool _pdb_read_pub32(RDReader* r, PDBsPub32* out) {
 }
 
 bool pdb_apply_symbols(RDContext* ctx, PDBFile* pdb, u16 sym_stream_idx,
-                       const PDBSectionHeaderList* sections,
-                       RDAddress imagebase) {
+                       const PDBSectionHeaderList* sections) {
     PDBStream s = {0};
     if(!pdb_read_stream_by_index(pdb, sym_stream_idx, &s)) return false;
 
@@ -43,8 +42,8 @@ bool pdb_apply_symbols(RDContext* ctx, PDBFile* pdb, u16 sym_stream_idx,
 
                 if(name && namelen > 0) {
                     RDAddress rva;
-                    if(pdb_section_va(sections, pub.Section, pub.Offset,
-                                      imagebase, &rva)) {
+                    if(pdb_section_va(ctx, sections, pub.Section, pub.Offset,
+                                      &rva)) {
                         if(pub.Flags & CVPSF_FUNCTION)
                             rd_set_function(ctx, rva);
                         rd_library_name(ctx, rva, name);

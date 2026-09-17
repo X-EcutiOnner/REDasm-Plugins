@@ -61,5 +61,5 @@ bool pdb_read_dbi_dbg_header(const PDBStream* s, const PDBDbiHeader* dbi,
 bool pdb_read_section_headers(PDBFile* pdb, u16 stream_idx,
                               PDBSectionHeaderList* out);
 void pdb_section_header_list_destroy(PDBSectionHeaderList* list);
-bool pdb_section_va(const PDBSectionHeaderList* list, u16 section, u32 offset,
-                    RDAddress imagebase, RDAddress* out);
+bool pdb_section_va(const RDContext* ctx, const PDBSectionHeaderList* list,
+                    u16 section, u32 offset, RDAddress* out);

@@ -98,10 +98,11 @@ void pdb_section_header_list_destroy(PDBSectionHeaderList* list) {
     *list = (PDBSectionHeaderList){0};
 }
 
-bool pdb_section_va(const PDBSectionHeaderList* list, u16 section, u32 offset,
-                    RDAddress imagebase, RDAddress* out) {
+bool pdb_section_va(const RDContext* ctx, const PDBSectionHeaderList* list,
+                    u16 section, u32 offset, RDAddress* out) {
     if(section == 0 || section > list->count) return false;
 
-    *out = imagebase + list->headers[section - 1].VirtualAddress + offset;
+    *out = rd_get_base_address(ctx) +
+           list->headers[section - 1].VirtualAddress + offset;
     return true;
 }
