@@ -12,8 +12,8 @@ target_sources(${PROJECT_NAME}
     PRIVATE 
         dbi.c
         load.c
+        module.c
         pdb.c
-        plugin.c
         symbols.c
 )
 

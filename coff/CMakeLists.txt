@@ -11,7 +11,7 @@ add_library(${PROJECT_NAME} SHARED)
 target_sources(${PROJECT_NAME}
     PRIVATE 
         coff.c
-        plugin.c
+        module.c
 )
 
 target_link_libraries(${PROJECT_NAME} 
