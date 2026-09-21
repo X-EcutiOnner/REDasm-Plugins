@@ -13,7 +13,6 @@ else()
 endif()
 
 add_subdirectory(coff)
-add_subdirectory(pdb)
 
 get_property(subdirs DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" PROPERTY SUBDIRECTORIES)
 
